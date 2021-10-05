@@ -1,10 +1,14 @@
 import io.restassured.response.Response;
 import model.ColorList;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.text.IsEmptyString.emptyString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,7 +55,7 @@ public class RestAssuredTests {
                         .spec(responseSpecCommon)
                         .body("total", is(12))
                         .extract().response().as(ColorList.class);
-        // @formatter:on
+                // @formatter:on
 
         assertThat(colorList.getData().size()).
                 withFailMessage("Size of array is not equal expected value!").
@@ -63,21 +67,23 @@ public class RestAssuredTests {
 
     @Test
     void checkCodeFromPost() {
+        // use org.json JSONObject to define json
+        JSONObject jsonObj = new JSONObject()
+                .put("name", "morpheus")
+                .put("job", "leader");
+
         Response response =
                 // @formatter:off
                 given().
                         spec(requestSpecCommon).
-                        body("{" +
-                                "    \"name\": \"morpheus\"," +
-                                "    \"job\": \"leader\"" +
-                                "}").
+                        body(jsonObj.toString()).
                 when()
                         .post("/users").
                 then()
                         .statusCode(201)
                         .body("name", is("morpheus"))
                         .extract().response();
-        // @formatter:on
+                // @formatter:on
 
         assertEquals(response.body().path("job"), "leader");
     }
